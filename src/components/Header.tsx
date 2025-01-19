@@ -5,15 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthDialog } from "@/components/AuthDialog";
 import { UploadDialog } from "@/components/UploadDialog";
+import { useSearchContext } from "@/context/SearchContext";
 
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery } = useSearchContext();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    // Search functionality will be implemented with backend
-    console.log("Searching for:", e.target.value);
+    console.log("Search query updated:", e.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    console.log("Search cleared");
   };
 
   return (
@@ -38,6 +43,16 @@ export const Header = () => {
                 className="w-full bg-pinterest-lightGray pl-10 pr-4 py-2 rounded-full"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pinterest-gray h-5 w-5" />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearSearch}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                >
+                  ×
+                </Button>
+              )}
             </div>
           </div>
 

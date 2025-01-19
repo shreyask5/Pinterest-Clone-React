@@ -1,4 +1,5 @@
 import { PinCard } from "@/components/PinCard";
+import { useSearchContext } from "@/context/SearchContext";
 
 const mockPins = [
   {
@@ -34,10 +35,27 @@ const mockPins = [
 ];
 
 const ExplorePage = () => {
+  const { searchQuery } = useSearchContext();
+
+  const filteredPins = mockPins.filter((pin) => {
+    const searchTerm = searchQuery.toLowerCase();
+    return (
+      pin.description.toLowerCase().includes(searchTerm) ||
+      pin.category.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  console.log("Filtered pins:", filteredPins.length);
+
   return (
     <div className="max-w-7xl mx-auto px-4 pt-20 pb-8">
+      {filteredPins.length === 0 && searchQuery && (
+        <div className="text-center text-gray-500 py-8">
+          No pins found matching "{searchQuery}"
+        </div>
+      )}
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-        {mockPins.map((pin) => (
+        {filteredPins.map((pin) => (
           <PinCard
             key={pin.id}
             image={pin.image}
