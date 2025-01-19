@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BookmarkPlus } from "lucide-react";
+import { BookmarkPlus, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PinCardProps {
   image: string;
   description: string;
   category: string;
+  onRemove?: () => void;
 }
 
-export const PinCard = ({ image, description, category }: PinCardProps) => {
+export const PinCard = ({ image, description, category, onRemove }: PinCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { toast } = useToast();
 
@@ -38,13 +39,23 @@ export const PinCard = ({ image, description, category }: PinCardProps) => {
         }`}
       >
         <div className="absolute top-4 right-4">
-          <Button
-            onClick={handleSave}
-            className="bg-pinterest-red hover:bg-pinterest-red/90 text-white rounded-full"
-          >
-            <BookmarkPlus className="h-5 w-5 mr-2" />
-            Save
-          </Button>
+          {onRemove ? (
+            <Button
+              onClick={onRemove}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full"
+            >
+              <Trash2 className="h-5 w-5 mr-2" />
+              Remove
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSave}
+              className="bg-pinterest-red hover:bg-pinterest-red/90 text-white rounded-full"
+            >
+              <BookmarkPlus className="h-5 w-5 mr-2" />
+              Save
+            </Button>
+          )}
         </div>
         
         <div className="absolute bottom-4 left-4 text-white">
