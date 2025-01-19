@@ -1,15 +1,32 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Upload, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthDialog } from "@/components/AuthDialog";
 import { UploadDialog } from "@/components/UploadDialog";
 import { useSearchContext } from "@/context/SearchContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
   const { searchQuery, setSearchQuery } = useSearchContext();
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -19,6 +36,19 @@ export const Header = () => {
   const handleClearSearch = () => {
     setSearchQuery("");
     console.log("Search cleared");
+  };
+
+  const handleAuthRequired = () => {
+    setShowAuthAlert(true);
+    console.log("Auth required alert shown");
+  };
+
+  const handleAuthConfirm = () => {
+    setShowAuthAlert(false);
+    // Simulate opening the auth dialog
+    const signInButton = document.querySelector('[role="dialog"] button') as HTMLButtonElement;
+    if (signInButton) signInButton.click();
+    console.log("Redirecting to auth dialog");
   };
 
   return (
@@ -57,29 +87,78 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <UploadDialog />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {isLoggedIn ? (
+                    <UploadDialog />
+                  ) : (
+                    <Button onClick={handleAuthRequired}>
+                      <Upload className="h-5 w-5" />
+                    </Button>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Upload new pins</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {isLoggedIn ? (
+                    <Button
+                      variant="ghost"
+                      className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
+                      onClick={() => navigate("/my-pins")}
+                    >
+                      <User className="h-5 w-5" />
+                      My Pins
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
+                      onClick={handleAuthRequired}
+                    >
+                      <User className="h-5 w-5" />
+                      My Pins
+                    </Button>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View your saved pins</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
             {isLoggedIn ? (
-              <>
-                <Link to="/my-pins">
-                  <Button variant="ghost" className="rounded-full hover:bg-pinterest-lightGray">
-                    My Pins
-                  </Button>
-                </Link>
-                <Button
-                  onClick={() => setIsLoggedIn(false)}
-                  variant="ghost"
-                  className="rounded-full hover:bg-pinterest-lightGray"
-                >
-                  Sign Out
-                </Button>
-              </>
+              <Button
+                onClick={() => setIsLoggedIn(false)}
+                variant="ghost"
+                className="rounded-full hover:bg-pinterest-lightGray"
+              >
+                Sign Out
+              </Button>
             ) : (
               <AuthDialog />
             )}
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showAuthAlert} onOpenChange={setShowAuthAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are not signed in. Please sign in to continue.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleAuthConfirm}>Sign In</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 };
