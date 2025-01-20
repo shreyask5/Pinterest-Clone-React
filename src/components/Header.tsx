@@ -162,8 +162,12 @@ export const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
+              <Button onClick={() => setShowAuthDialog(true)} variant="default">
+                Sign In
+              </Button>
             )}
+
+            <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
           </div>
         </div>
       </div>

@@ -206,3 +206,34 @@ export function AuthDialog({ onAuthStateChange, open, onOpenChange }: AuthDialog
     </Dialog>
   );
 }
+
+export function AuthButton() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Only render the button if user is not logged in
+  if (isLoggedIn) {
+    return null;
+  }
+
+  return (
+    <>
+      <Button onClick={() => setIsDialogOpen(true)} variant="default">
+        Sign In
+      </Button>
+      <AuthDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onAuthStateChange={setIsLoggedIn}
+      />
+    </>
+  );
+}
