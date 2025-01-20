@@ -1,43 +1,35 @@
+import { useEffect, useState } from "react";
 import { PinCard } from "@/components/PinCard";
 import { useSearchContext } from "@/context/SearchContext";
-
-const mockPins = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-    description: "Working from home setup",
-    category: "Workspace",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    description: "Tech workspace inspiration",
-    category: "Technology",
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-    description: "Circuit board close-up",
-    category: "Electronics",
-  },
-  {
-    id: 4,
-    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-    description: "Coding session",
-    category: "Programming",
-  },
-  {
-    id: 5,
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-    description: "Modern workspace",
-    category: "Workspace",
-  },
-];
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const ExplorePage = () => {
-  const { searchQuery } = useSearchContext();
+  const { searchQuery } = useSearchContext(); // Search context for filtering
+  const [pins, setPins] = useState([]); // State to hold all pins from Firestore
+  const [isLoading, setIsLoading] = useState(true); // State for loading indicator
 
-  const filteredPins = mockPins.filter((pin) => {
+  useEffect(() => {
+    const fetchPins = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "explore"));
+        const pinsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setPins(pinsData);
+      } catch (error) {
+        console.error("Error fetching pins:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPins();
+  }, []);
+
+  // Filter pins based on search query
+  const filteredPins = pins.filter((pin) => {
     const searchTerm = searchQuery.toLowerCase();
     return (
       pin.description.toLowerCase().includes(searchTerm) ||
@@ -45,7 +37,13 @@ const ExplorePage = () => {
     );
   });
 
-  console.log("Filtered pins:", filteredPins.length);
+  if (isLoading) {
+    return (
+      <div className="text-center text-gray-500 py-8">
+        Loading pins...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 pt-20 pb-8">

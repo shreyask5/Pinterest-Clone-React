@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { BookmarkPlus, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { PinDialog } from "@/components/PinDialog";
+import { auth, db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 interface PinCardProps {
   image: string;
@@ -16,12 +18,34 @@ export const PinCard = ({ image, description, category, onRemove }: PinCardProps
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleSave = (e: React.MouseEvent) => {
+  const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast({
-      title: "Pin saved!",
-      description: "The pin has been added to your collection.",
-    });
+    
+    if (!auth.currentUser) {
+      // Trigger auth dialog through context or props
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "savedPins"), {
+        userId: auth.currentUser.uid,
+        image,
+        description,
+        category,
+        savedAt: new Date(),
+      });
+
+      toast({
+        title: "Pin saved!",
+        description: "The pin has been added to your collection.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving pin",
+        description: "There was an error saving your pin. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleClick = () => {

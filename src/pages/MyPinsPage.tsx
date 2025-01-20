@@ -1,70 +1,96 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { PinCard } from "@/components/PinCard";
+import { AuthDialog } from "@/components/AuthDialog";
 
-const mockSavedPins = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-    description: "Working from home setup",
-    category: "Workspace",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    description: "Tech workspace inspiration",
-    category: "Technology",
-  },
-];
+interface SavedPin {
+  id: string;
+  image: string;
+  description: string;
+  category: string;
+  savedAt: Date;
+}
 
-const MyPinsPage = () => {
+const MyPins = () => {
+  const [pins, setPins] = useState<SavedPin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // This will be replaced with actual auth state
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      toast({
-        variant: "destructive",
-        title: "Authentication required",
-        description: "Please log in to view your pins.",
-      });
-      navigate("/");
-    }
-  }, [isLoggedIn, navigate, toast]);
-
-  const handleRemovePin = (pinId: number) => {
-    toast({
-      title: "Pin removed",
-      description: "The pin has been removed from your collection.",
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setShowAuthDialog(true);
+      } else {
+        fetchUserPins(user.uid);
+      }
     });
-    // Pin removal logic will be implemented with backend
-    console.log("Removing pin:", pinId);
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchUserPins = async (userId: string) => {
+    try {
+      const q = query(
+        collection(db, "savedPins"),
+        where("userId", "==", userId)
+      );
+      const snapshot = await getDocs(q);
+      const userPins = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        savedAt: doc.data().savedAt.toDate(),
+      })) as SavedPin[];
+      setPins(userPins);
+    } catch (error) {
+      console.error("Error fetching pins:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleRemovePin = async (pinId: string) => {
+    try {
+      // Remove the pin from Firestore
+      await deleteDoc(doc(db, "savedPins", pinId));
+
+      // Update the state to remove the pin locally
+      setPins((prevPins) => prevPins.filter((pin) => pin.id !== pinId));
+    } catch (error) {
+      console.error("Error removing pin:", error);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-20 pb-8">
-      <h1 className="text-2xl font-bold mb-6">My Pins</h1>
-      {isLoggedIn ? (
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
-          {mockSavedPins.map((pin) => (
+    <div className="max-w-7xl mx-auto px-4 py-8 mt-16">
+      <h1 className="text-3xl font-bold mb-8">My Pins</h1>
+      {pins.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-600">You haven't saved any pins yet.</p>
+        </div>
+      ) : (
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+          {pins.map((pin) => (
             <PinCard
               key={pin.id}
               image={pin.image}
               description={pin.description}
               category={pin.category}
-              onRemove={() => handleRemovePin(pin.id)}
+              onRemove={() => handleRemovePin(pin.id)} // Pass the pin ID to the handler
             />
           ))}
         </div>
-      ) : (
-        <div className="text-center text-gray-500">
-          Please log in to view your pins
-        </div>
       )}
+
+      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
     </div>
   );
 };
 
-export default MyPinsPage;
+export default MyPins;

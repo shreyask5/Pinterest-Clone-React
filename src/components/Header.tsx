@@ -1,6 +1,9 @@
-import { useState } from "react";
+// ... existing imports ...
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Upload, User } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthDialog } from "@/components/AuthDialog";
@@ -16,6 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -23,10 +32,20 @@ import {
 } from "@/components/ui/tooltip";
 
 export const Header = () => {
+  const [user, setUser] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAuthAlert, setShowAuthAlert] = useState(false);
   const { searchQuery, setSearchQuery } = useSearchContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      setIsLoggedIn(!!user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -39,16 +58,25 @@ export const Header = () => {
   };
 
   const handleAuthRequired = () => {
+    setShowAuthDialog(true);
     setShowAuthAlert(true);
     console.log("Auth required alert shown");
   };
 
   const handleAuthConfirm = () => {
     setShowAuthAlert(false);
-    // Simulate opening the auth dialog
-    const signInButton = document.querySelector('[role="dialog"] button') as HTMLButtonElement;
-    if (signInButton) signInButton.click();
+    setShowAuthDialog(true);
     console.log("Redirecting to auth dialog");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      setIsLoggedIn(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -99,48 +127,42 @@ export const Header = () => {
                   )}
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Upload new pins</p>
+                  <p>{isLoggedIn ? "Upload new pins" : "Sign in to upload pins"}</p>
                 </TooltipContent>
               </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {isLoggedIn ? (
-                    <Button
-                      variant="ghost"
-                      className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
-                      onClick={() => navigate("/my-pins")}
-                    >
-                      <User className="h-5 w-5" />
-                      My Pins
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
-                      onClick={handleAuthRequired}
-                    >
-                      <User className="h-5 w-5" />
-                      My Pins
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
+                    onClick={isLoggedIn ? () => navigate("/my-pins") : handleAuthRequired}
+                  >
+                    <User className="h-5 w-5" />
+                    My Pins
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>View your saved pins</p>
+                  <p>{isLoggedIn ? "View your saved pins" : "Sign in to view your pins"}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
             {isLoggedIn ? (
-              <Button
-                onClick={() => setIsLoggedIn(false)}
-                variant="ghost"
-                className="rounded-full hover:bg-pinterest-lightGray"
-              >
-                Sign Out
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage src={user?.photoURL} />
+                    <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <AuthDialog />
+              <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
             )}
           </div>
         </div>

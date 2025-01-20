@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react"; // Import hooks first
+import { AiOutlineUpload as Upload } from "react-icons/ai";
+import { AuthDialog } from "@/components/AuthDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,8 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload } from "lucide-react";
+import { auth, db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import axios from "axios";
 
+// Constants
 const categories = [
   "Art",
   "Photography",
@@ -34,15 +39,91 @@ const categories = [
 
 export function UploadDialog() {
   const [isOpen, setIsOpen] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string>("");
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null); // State to store the userId
+  const [showAuthDialog, setShowAuthDialog] = useState(false); // Fix hook usage
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Pin Created!",
-      description: "Your pin has been created successfully.",
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setShowAuthDialog(true);
+      } else {
+        setUserId(user.uid); // Store the userId in state
+      }
     });
-    setIsOpen(false);
+    return () => unsubscribe();
+  }, []);
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!image || !description || !category) {
+      toast({
+        title: "Error",
+        description: "All fields are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Step 1: Prepare the form data for the upload
+      const formData = new FormData();
+      formData.append("file", image);
+
+      // Step 2: Send the file to the backend for uploading
+      const { data } = await axios.post("http://localhost:3000/upload-to-s3", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const { fileUrl } = data;
+
+      // Step 3: Save pin details in Firestore
+      const pinDetails = {
+        category,
+        description,
+        image: fileUrl,
+        savedAt: new Date(),
+        userId: userId,
+      };
+
+      // Add to the 'explore' collection
+      await addDoc(collection(db, "explore"), pinDetails);
+
+      // Add to the 'savedPins' collection
+      await addDoc(collection(db, "savedPins"), pinDetails);
+
+      toast({
+        title: "Pin Created!",
+        description: "Your pin has been created successfully.",
+      });
+
+      // Reset state and close dialog
+      setIsOpen(false);
+      setImage(null);
+      setDescription("");
+      setCategory("");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload pin. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -69,6 +150,7 @@ export function UploadDialog() {
                 type="file"
                 accept="image/*"
                 className="hidden"
+                onChange={handleFileChange}
                 required
               />
               <Label
@@ -84,12 +166,14 @@ export function UploadDialog() {
             <Textarea
               id="description"
               placeholder="What's your pin about?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Select required>
+            <Select value={category} onValueChange={setCategory} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
