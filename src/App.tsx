@@ -12,8 +12,8 @@ const App = () => {
         <Toaster />
         <Header />
         <Routes>
-          <Route path="/" element={<ExplorePage />} />
-          <Route path="/my-pins" element={<MyPinsPage />} />
+          <Route path="/projects/pinterest-clone/demo" element={<ExplorePage />} />
+          <Route path="/projects/pinterest-clone/demo/my-pins" element={<MyPinsPage />} />
         </Routes>
       </SearchProvider>
     </BrowserRouter>

@@ -83,7 +83,7 @@ export function UploadDialog() {
       formData.append("file", image);
 
       // Step 2: Send the file to the backend for uploading
-      const { data } = await axios.post("http://localhost:3000/upload-to-s3", formData, {
+      const { data } = await axios.post("https://shreyask.in/projects/pinterest-clone/demo/api", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

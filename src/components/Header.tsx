@@ -73,7 +73,7 @@ export const Header = () => {
     try {
       await auth.signOut();
       setIsLoggedIn(false);
-      navigate("/");
+      navigate("/projects/pinterest-clone/demo");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -83,9 +83,9 @@ export const Header = () => {
     <header className="fixed top-0 left-0 right-0 bg-white z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="flex-shrink-0">
+          <Link to="/projects/pinterest-clone/demo" className="flex-shrink-0">
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/0/08/Pinterest-logo.png"
+              src="https://pinterest-clone-picture-storage.s3.ap-south-1.amazonaws.com/Pinterest-logo.png"
               alt="Pinterest Logo"
               className="h-8 w-auto"
             />
@@ -136,7 +136,7 @@ export const Header = () => {
                   <Button
                     variant="ghost"
                     className="rounded-full hover:bg-pinterest-lightGray flex items-center gap-2"
-                    onClick={isLoggedIn ? () => navigate("/my-pins") : handleAuthRequired}
+                    onClick={isLoggedIn ? () => navigate("/projects/pinterest-clone/demo/my-pins") : handleAuthRequired}
                   >
                     <User className="h-5 w-5" />
                     My Pins
@@ -157,7 +157,7 @@ export const Header = () => {
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/projects/pinterest-clone/demo/profile")}>Profile</DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
