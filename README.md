@@ -103,6 +103,28 @@ This project incorporates a **React.js** frontend connected to a **Node.js** bac
 ### 9. **Email OTP for Sign-Up**  
   - The sign-up process does not include an OTP (One-Time Password) for email verification. This will be implemented in future updates.
 
+## Changelog
+
+### **Version 1.0**  
+#### **Frontend**  
+- Implemented the **Explore Page** to showcase all uploaded images.  
+- Built **MyPins Page** for users to manage their personal uploaded images.  
+- Added **Google Authentication** for secure user login and registration.  
+- Developed **Search Functionality** to search images by title or description.  
+- Created basic **Responsive Design**, though not fully optimized across all devices.  
+
+#### **Backend**  
+- Established a **Node.js** server with **Express.js** for API routes.  
+- Integrated **Firestore Database** to store user data and image metadata.  
+- Configured **AWS S3** to store uploaded images securely.  
+
+#### **Authentication & Cloud Storage**  
+- Integrated **Google Authentication** for user sign-up and login.  
+- Set up **AWS S3 Bucket** to handle image uploads efficiently.  
+- Configured **Firestore Database** for storing user information and image details.
+
+---
+
 ## Conclusion
 
 The Pinterest Clone is a feature-rich, full-stack application that replicates essential functionalities of the Pinterest platform, including image uploads, user authentication, and content management. While there are some known issues and areas for improvement, the project demonstrates the use of modern web technologies and cloud services to build a scalable, efficient, and user-friendly web application.
