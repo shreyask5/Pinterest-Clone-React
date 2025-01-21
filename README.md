@@ -1,69 +1,109 @@
-# Welcome to your Lovable project
+# Pinterest Clone: Full-Stack Web Application
 
-## Project info
+## **Try Pinterest Clone Live**: [https://shreyask.in/projects/pinterest-clone/demo](https://shreyask.in/projects/pinterest-clone/demo)
 
-**URL**: https://lovable.dev/projects/0637c992-0da1-4bbc-b810-da8623165455
+This project is a full-stack Pinterest clone built using **React.js** for the frontend and **Node.js with Express.js** for the backend. It includes features like **Google Authentication**, **Firestore Database**, **AWS S3 for image uploads**, and much more. Hosted on **Oracle Cloud**, the application replicates core functionalities of Pinterest, providing users with a seamless image upload and exploration experience.
 
-## How can I edit this code?
+## Table of Contents
 
-There are several ways of editing your application.
+- [Introduction](#introduction)
+- [Project Overview](#project-overview)
+- [Features and Functionalities](#features-and-functionalities)
+- [Technology Stack](#technology-stack)
+- [Known Issues and Areas for Improvement](#known-issues-and-areas-for-improvement)
+- [Conclusion](#conclusion)
 
-**Use Lovable**
+## Introduction
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0637c992-0da1-4bbc-b810-da8623165455) and start prompting.
+The Pinterest Clone is designed to mimic key functionalities of the Pinterest platform, offering users the ability to explore images, upload personal content, and manage their uploads through an intuitive and user-friendly interface. It integrates powerful backend technologies, cloud storage, and real-time database management to offer a scalable and efficient solution.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Project Overview
 
-**Use your preferred IDE**
+This project incorporates a **React.js** frontend connected to a **Node.js** backend, hosted on **Oracle Cloud**. The application allows users to sign in via **Google Authentication** or use email-based login. The platform utilizes **Firestore Database** to manage user data, and images are stored in **AWS S3** for quick retrieval. With pages like **Explore**, **MyPins**, and **Profile**, users can easily browse, upload, and organize their content.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Features and Functionalities
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Google Authentication**: 
+  - Users can sign in with Google or register via email for secure access to the platform.
+  
+- **Image Upload & Management**: 
+  - Users can upload images to **AWS S3**, which are stored and displayed on the **Explore** and **MyPins** pages.
+  
+- **Explore Page**: 
+  - Browse all uploaded content in a clean, user-friendly interface.
+  
+- **MyPins Page**: 
+  - Manage personal uploads and content once signed in.
+  
+- **Profile Page**: 
+  - Access and update user-specific details (currently under development).
+  
+- **Search Functionality**: 
+  - Search for images by title or description to easily find specific content.
 
-Follow these steps:
+- **Firestore Database**: 
+  - Efficiently stores user details, uploaded images, and metadata for seamless access.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Responsive Design**: 
+  - Designed to work on various devices (currently in progress).
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Technology Stack
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Frontend**: 
+  - React.js
+  - HTML5
+  - CSS
+  - JavaScript
+  
+- **Backend**: 
+  - Node.js
+  - Express.js
+  
+- **Database**: 
+  - Firebase Firestore
+  
+- **Cloud Storage**: 
+  - AWS S3 for image uploads
+  
+- **Authentication**: 
+  - Google Authentication for secure sign-ins
+  
+- **Hosting**: 
+  - Oracle Cloud
+  
+- **Version Control**: Git
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Known Issues and Areas for Improvement
 
-**Edit a file directly in GitHub**
+### 1. **Search Functionality**  
+- The search feature currently works only on the homepage and does not function across other pages. This will be improved in future updates.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 2. **Responsiveness**  
+- The website is not fully responsive and requires adjustments for proper display across all devices.
 
-**Use GitHub Codespaces**
+### 3. **Profile Page**  
+- A dedicated user profile page is missing and will be implemented in a future update.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### 4. **Save and Share Buttons**  
+- The save and share buttons are not functional yet, and will be added in upcoming releases.
 
-## What technologies are used for this project?
+### 5. **Image Upload Preview**  
+- The application currently does not display a preview of images being uploaded. This functionality will be added for better user experience.
 
-This project is built with .
+### 6. **Performance Issues**  
+  - The website experiences slow loading times due to large bundled file sizes.
+  - Some chunks exceed 500 kB after minification, which affects the website's performance. To address this, code-splitting and other performance optimization techniques will be explored in future versions.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 7. **Direct Link Issue**  
+- When navigating directly to `https://shreyask.in/projects/pinterest-clone/demo/my-pins`, users are shown a loading screen instead of the sign-up prompt. This will be fixed in the next update.
 
-## How can I deploy this project?
+### 8. **Upload Metadata**  
+  - The timestamp and uploader's name need to be displayed correctly. Additionally, the title should have a character limit, while the description can be long. Currently, the description can be very long and appears when hovering over the image.
 
-Simply open [Lovable](https://lovable.dev/projects/0637c992-0da1-4bbc-b810-da8623165455) and click on Share -> Publish.
+### 9. **Email OTP for Sign-Up**  
+  - The sign-up process does not include an OTP (One-Time Password) for email verification. This will be implemented in future updates.
 
-## I want to use a custom domain - is that possible?
+## Conclusion
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+The Pinterest Clone is a feature-rich, full-stack application that replicates essential functionalities of the Pinterest platform, including image uploads, user authentication, and content management. While there are some known issues and areas for improvement, the project demonstrates the use of modern web technologies and cloud services to build a scalable, efficient, and user-friendly web application.
+
