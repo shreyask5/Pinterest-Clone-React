@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PinCard } from "@/components/PinCard";
 import { useSearchContext } from "@/context/SearchContext";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const ExplorePage = () => {
@@ -10,22 +10,19 @@ const ExplorePage = () => {
   const [isLoading, setIsLoading] = useState(true); // State for loading indicator
 
   useEffect(() => {
-    const fetchPins = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "explore"));
-        const pinsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPins(pinsData);
-      } catch (error) {
-        console.error("Error fetching pins:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const unsubscribe = onSnapshot(collection(db, "explore"), (snapshot) => {
+      const pinsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPins(pinsData);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error fetching pins:", error);
+      setIsLoading(false);
+    });
 
-    fetchPins();
+    return () => unsubscribe();
   }, []);
 
   // Filter pins based on search query
@@ -52,13 +49,16 @@ const ExplorePage = () => {
           No pins found matching "{searchQuery}"
         </div>
       )}
-      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2 sm:gap-4">
         {filteredPins.map((pin) => (
           <PinCard
             key={pin.id}
             image={pin.image}
+            title={pin.title}
             description={pin.description}
             category={pin.category}
+            uploaderName={pin.uploaderName}
+            uploadDate={pin.savedAt?.toDate ? pin.savedAt.toDate() : new Date(pin.savedAt)}
           />
         ))}
       </div>

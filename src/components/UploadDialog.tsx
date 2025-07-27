@@ -23,7 +23,6 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { auth, db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import axios from "axios";
 
 // Constants
 const categories = [
@@ -40,6 +39,8 @@ const categories = [
 export function UploadDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("");
   const { toast } = useToast();
@@ -62,13 +63,16 @@ export function UploadDialog() {
     const file = e.target.files?.[0];
     if (file) {
       setImage(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!image || !description || !category) {
+    if (!image || !title || !description || !category) {
       toast({
         title: "Error",
         description: "All fields are required.",
@@ -78,11 +82,11 @@ export function UploadDialog() {
     }
 
     try {
-      // Step 1: Prepare the form data for the upload
       const formData = new FormData();
       formData.append("file", image);
 
-      // Step 2: Send the file to the backend for uploading
+      // Dynamic import for axios
+      const { default: axios } = await import("axios");
       const { data } = await axios.post("https://shreyask.in/projects/pinterest-clone/demo/api", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -93,11 +97,14 @@ export function UploadDialog() {
 
       // Step 3: Save pin details in Firestore
       const pinDetails = {
+        title,
         category,
         description,
         image: fileUrl,
         savedAt: new Date(),
         userId: userId,
+        uploaderName: auth.currentUser?.displayName || auth.currentUser?.email || "Anonymous",
+        uploadDate: new Date(),
       };
 
       // Add to the 'explore' collection
@@ -114,6 +121,11 @@ export function UploadDialog() {
       // Reset state and close dialog
       setIsOpen(false);
       setImage(null);
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+        setImagePreview(null);
+      }
+      setTitle("");
       setDescription("");
       setCategory("");
     } catch (error) {
@@ -129,12 +141,13 @@ export function UploadDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" />
-          Create Pin
-        </Button>
+        <span>
+          <Button className="bg-gray-100 hover:bg-gray-200 text-black rounded-full p-3 border-0" variant="ghost">
+            <Upload className="h-5 w-5" />
+          </Button>
+        </span>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle>Create New Pin</DialogTitle>
           <DialogDescription>
@@ -144,7 +157,7 @@ export function UploadDialog() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="image">Image</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+            <div className="border-2 border-dashed rounded-lg p-2 sm:p-4 text-center">
               <Input
                 id="image"
                 type="file"
@@ -153,28 +166,63 @@ export function UploadDialog() {
                 onChange={handleFileChange}
                 required
               />
-              <Label
-                htmlFor="image"
-                className="cursor-pointer block py-8 text-gray-500"
-              >
-                Click to upload or drag and drop
-              </Label>
+              {imagePreview ? (
+                <div className="space-y-2 sm:space-y-4">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="max-w-full h-32 sm:h-48 object-cover rounded-lg mx-auto"
+                  />
+                  <Label
+                    htmlFor="image"
+                    className="cursor-pointer inline-block bg-gray-100 hover:bg-gray-200 px-3 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm"
+                  >
+                    Change Image
+                  </Label>
+                </div>
+              ) : (
+                <Label
+                  htmlFor="image"
+                  className="cursor-pointer block py-4 sm:py-8 text-gray-500 text-sm"
+                >
+                  Click to upload or drag and drop
+                </Label>
+              )}
             </div>
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              placeholder="Add a title (max 100 characters)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value.slice(0, 100))}
+              maxLength={100}
+              className="text-sm"
+              required
+            />
+            <p className="text-xs text-gray-500">{title.length}/100 characters</p>
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="What's your pin about?"
+              placeholder="What's your pin about? (max 500 characters)"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+              maxLength={500}
+              className="text-sm min-h-[80px]"
               required
             />
+            <p className="text-xs text-gray-500">{description.length}/500 characters</p>
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
             <Select value={category} onValueChange={setCategory} required>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -186,7 +234,8 @@ export function UploadDialog() {
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit" className="w-full">
+          
+          <Button type="submit" className="w-full text-sm sm:text-base">
             Create Pin
           </Button>
         </form>
@@ -194,3 +243,4 @@ export function UploadDialog() {
     </Dialog>
   );
 }
+

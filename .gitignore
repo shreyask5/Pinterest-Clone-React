@@ -26,3 +26,9 @@ dist-ssr
 
 #env
 .env
+
+#private key for firebase
+service-account-key.json
+
+#update-urls.js
+update-urls.js
