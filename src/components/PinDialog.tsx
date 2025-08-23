@@ -2,6 +2,9 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { auth, db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 // Dynamic import for date formatting
 const formatDate = async (date: Date) => {
@@ -27,6 +30,7 @@ interface PinDialogProps {
 
 export const PinDialog = ({ isOpen, onClose, pin, showRemove = false, onRemove }: PinDialogProps) => {
   const [formattedDate, setFormattedDate] = useState<string>("Date not available");
+  const { toast } = useToast();
 
   useEffect(() => {
     const getFormattedDate = async () => {
@@ -44,10 +48,42 @@ export const PinDialog = ({ isOpen, onClose, pin, showRemove = false, onRemove }
     }
   }, [isOpen, pin.uploadDate, pin.savedAt]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (showRemove && onRemove) {
       onRemove();
       onClose();
+      return;
+    }
+
+    // Handle saving the pin
+    if (!auth.currentUser) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to save pins.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "savedPins"), {
+        userId: auth.currentUser.uid,
+        image: pin.image,
+        description: pin.description,
+        category: pin.category,
+        savedAt: new Date(),
+      });
+
+      toast({
+        title: "Pin saved!",
+        description: "The pin has been added to your collection.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving pin",
+        description: "There was an error saving your pin. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

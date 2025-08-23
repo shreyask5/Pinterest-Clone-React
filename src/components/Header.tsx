@@ -87,7 +87,7 @@ export const Header = () => {
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           <Link to="/projects/pinterest-clone/demo" className="flex-shrink-0">
             <img
-              src="https://pinterest-clone-picture-storage.s3.ap-south-1.amazonaws.com/Pinterest-logo.png"
+              src="https://pinterest-clone-s3-bucket-shreyas.s3.ap-south-1.amazonaws.com/Pinterest-logo.png"
               alt="Pinterest Logo"
               className="h-6 sm:h-8 w-auto"
             />
