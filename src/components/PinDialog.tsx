@@ -88,7 +88,7 @@ export const PinDialog = ({ isOpen, onClose, pin, showRemove = false, onRemove }
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/projects/pinterest-clone/demo/pin/${encodeURIComponent(pin.image)}`;
+    const shareUrl = `${window.location.origin}/pin/${encodeURIComponent(pin.image)}`;
     
     if (navigator.share) {
       try {

@@ -19,10 +19,10 @@ const App = () => {
         <Header />
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/projects/pinterest-clone/demo" element={<ExplorePage />} />
-            <Route path="/projects/pinterest-clone/demo/my-pins" element={<MyPinsPage />} />
-            <Route path="/projects/pinterest-clone/demo/profile" element={<ProfilePage />} />
-            <Route path="/projects/pinterest-clone/demo/pin/:imageUrl" element={<SharedPinPage />} />
+            <Route path="/" element={<ExplorePage />} />
+            <Route path="/my-pins" element={<MyPinsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/pin/:imageUrl" element={<SharedPinPage />} />
           </Routes>
         </Suspense>
       </SearchProvider>

@@ -37,7 +37,7 @@ const SharedPinPage = () => {
   const handleClose = () => {
     setIsOpen(false);
     // Navigate to home page instead of going back
-    window.location.href = "/projects/pinterest-clone/demo";
+    window.location.href = "/";
   };
 
   if (!pin) {

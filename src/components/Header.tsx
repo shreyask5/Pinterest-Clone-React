@@ -52,8 +52,8 @@ export const Header = () => {
     const value = e.target.value;
     setSearchQuery(value);
     
-    if (value && location.pathname !== '/projects/pinterest-clone/demo') {
-      navigate('/projects/pinterest-clone/demo');
+    if (value && location.pathname !== '/') {
+      navigate('/');
     }
   };
 
@@ -75,7 +75,7 @@ export const Header = () => {
     try {
       await auth.signOut();
       setIsLoggedIn(false);
-      navigate("/projects/pinterest-clone/demo");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -85,7 +85,7 @@ export const Header = () => {
     <header className="fixed top-0 left-0 right-0 bg-white z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <Link to="/projects/pinterest-clone/demo" className="flex-shrink-0">
+          <Link to="/" className="flex-shrink-0">
             <img
               src="https://pinterest-clone-s3-bucket-shreyas.s3.ap-south-1.amazonaws.com/Pinterest-logo.png"
               alt="Pinterest Logo"
@@ -147,10 +147,10 @@ export const Header = () => {
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => navigate("/projects/pinterest-clone/demo/my-pins")}>
+                  <DropdownMenuItem onClick={() => navigate("/my-pins")}>
                     My Pins
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/projects/pinterest-clone/demo/profile")}>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
                     Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
